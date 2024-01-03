@@ -7,6 +7,7 @@ from omegaconf import OmegaConf
 from train import trainer
 from feature_extractor import * 
 from ddad import *
+
 os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2"
 
 def build_model(config):
@@ -15,6 +16,16 @@ def build_model(config):
     else:
         unet = UNetModel(config.data.image_size, 64, dropout=0.0, n_heads=4 ,in_channels=config.data.input_channel)
     return unet
+
+def inference(config):
+    torch.manual_seed(42)
+    np.random.seed(42)
+    unet = build_model(config)
+    print(" Num params: ", sum(p.numel() for p in unet.parameters()))
+    unet = unet.to(config.model.device)
+    unet.eval()
+ 
+
 
 def train(config):
     torch.manual_seed(42)
@@ -39,7 +50,7 @@ def detection(config):
     unet.eval()
     ddad = DDAD(unet, config)
     ddad()
-    
+
 
 def finetuning(config):
     unet = build_model(config)
@@ -49,8 +60,6 @@ def finetuning(config):
     unet.to(config.model.device)
     unet.eval()
     domain_adaptation(unet, config, fine_tune=True)
-
-
 
 
 

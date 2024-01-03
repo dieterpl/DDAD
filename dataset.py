@@ -13,9 +13,9 @@ import torchvision.datasets as datasets
 from torchvision.datasets import CIFAR10
 
 
-
 class Dataset_maker(torch.utils.data.Dataset):
     def __init__(self, root, category, config, is_train=True):
+        print("Dataset root",root)
         self.image_transform = transforms.Compose(
             [
                 transforms.Resize((config.data.image_size, config.data.image_size)),  
@@ -33,17 +33,18 @@ class Dataset_maker(torch.utils.data.Dataset):
         if is_train:
             if category:
                 self.image_files = glob(
-                    os.path.join(root, category, "train", "good", "*.png")
+                    os.path.join(root, "train",  "*.jpg")
                 )
             else:
                 self.image_files = glob(
-                    os.path.join(root, "train", "good", "*.png")
+                    os.path.join(root, "train",  "*.jpg")
                 )
         else:
             if category:
-                self.image_files = glob(os.path.join(root, category, "test", "*", "*.png"))
+                self.image_files = glob(os.path.join(root, "test", "*", "*.jpg"))
             else:
-                self.image_files = glob(os.path.join(root, "test", "*", "*.png"))
+                self.image_files = glob(os.path.join(root, "test", "*", "*.jpg"))
+        print("Images",len(self.image_files))
         self.is_train = is_train
 
     def __getitem__(self, index):

@@ -7,6 +7,7 @@ from omegaconf import OmegaConf
 from train import trainer
 from feature_extractor import * 
 from ddad import *
+from inference import Inference
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2"
 
@@ -23,8 +24,9 @@ def inference(config):
     unet = build_model(config)
     print(" Num params: ", sum(p.numel() for p in unet.parameters()))
     unet = unet.to(config.model.device)
+    unet.load_state_dict(torch.load("checkpoints/MVTec/screw/37"))
     unet.eval()
- 
+    Inference(unet,config)()
 
 
 def train(config):
@@ -74,6 +76,9 @@ def parse_args():
     cmdline_parser.add_argument('--detection', 
                                 default= False, 
                                 help='Detection anomalies')
+    cmdline_parser.add_argument('--inference', 
+                                default= False, 
+                                help='Inference')
     cmdline_parser.add_argument('--domain_adaptation', 
                                 default= False, 
                                 help='Domain adaptation')
@@ -101,6 +106,9 @@ if __name__ == "__main__":
     if args.detection:
         print('Detecting Anomalies...')
         detection(config)
+    if args.inference:
+        print('Inference...')
+        inference(config)
 
 
         

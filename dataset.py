@@ -41,9 +41,9 @@ class Dataset_maker(torch.utils.data.Dataset):
                 )
         else:
             if category:
-                self.image_files = glob(os.path.join(root, "test", "*", "*.jpg"))
+                self.image_files = glob(os.path.join(root, "test", "*.jpg"))
             else:
-                self.image_files = glob(os.path.join(root, "test", "*", "*.jpg"))
+                self.image_files = glob(os.path.join(root, "test", "*.jpg"))
         print("Images",len(self.image_files))
         self.is_train = is_train
 
@@ -53,35 +53,8 @@ class Dataset_maker(torch.utils.data.Dataset):
         image = self.image_transform(image)
         if(image.shape[0] == 1):
             image = image.expand(3, self.config.data.image_size, self.config.data.image_size)
-        if self.is_train:
-            label = 'good'
-            return image, label
-        else:
-            if self.config.data.mask:
-                if os.path.dirname(image_file).endswith("good"):
-                    target = torch.zeros([1, image.shape[-2], image.shape[-1]])
-                    label = 'good'
-                else :
-                    if self.config.data.name == 'MVTec':
-                        target = Image.open(
-                            image_file.replace("/test/", "/ground_truth/").replace(
-                                ".png", "_mask.png"
-                            )
-                        )
-                    else:
-                        target = Image.open(
-                            image_file.replace("/test/", "/ground_truth/"))
-                    target = self.mask_transform(target)
-                    label = 'defective'
-            else:
-                if os.path.dirname(image_file).endswith("good"):
-                    target = torch.zeros([1, image.shape[-2], image.shape[-1]])
-                    label = 'good'
-                else :
-                    target = torch.zeros([1, image.shape[-2], image.shape[-1]])
-                    label = 'defective'
-                
-            return image, target, label
+        label = 'good'
+        return image, label
 
     def __len__(self):
         return len(self.image_files)

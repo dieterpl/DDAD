@@ -28,11 +28,18 @@ class Inference:
         self.unet = unet
         self.config = config
         self.reconstruction = Reconstruction(self.unet, self.config)
-    def __call__(self) -> Any:
         
+    def __call__(self) -> Any:
+        os.makedirs("recons",exist_ok=True)
+        i = 0
         with torch.no_grad():
-            for input in self.testloader:
+            for input,label in self.testloader:
                 input = input.to(self.config.model.device)
                 x0 = self.reconstruction(input, input, self.config.model.w)[-1]
-                image = show_tensor_image(x0)
-                print(image)
+                for b in range(x0.shape[0]):
+                    x = show_tensor_image(x0[b])
+                    y = show_tensor_image(input[b])
+                    image = np.vstack((x,y))
+                    Image.fromarray(image).save(f"recons/{i}{b}.png")
+                i+=1
+                print(i,b)

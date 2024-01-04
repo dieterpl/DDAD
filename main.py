@@ -7,7 +7,7 @@ from omegaconf import OmegaConf
 from train import trainer
 from feature_extractor import * 
 from ddad import *
-from inference import Inference
+from Inference import Inference
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2"
 
@@ -23,10 +23,12 @@ def inference(config):
     np.random.seed(42)
     unet = build_model(config)
     print(" Num params: ", sum(p.numel() for p in unet.parameters()))
+    unet = torch.nn.DataParallel(unet)
     unet = unet.to(config.model.device)
-    unet.load_state_dict(torch.load("checkpoints/MVTec/screw/37"))
+    unet.load_state_dict(torch.load("/home/ubuntu/visense/dev/DDAD/checkpoints/MVTec/screw/37"))
     unet.eval()
-    Inference(unet,config)()
+    inf = Inference(unet,config)
+    inf()
 
 
 def train(config):

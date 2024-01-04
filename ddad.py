@@ -9,7 +9,7 @@ from metrics import *
 from feature_extractor import *
 from reconstruction import *
 os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2"
-
+import matplotlib.pyplot as plt
 class DDAD:
     def __init__(self, unet, config) -> None:
         self.test_dataset = Dataset_maker(
@@ -29,7 +29,7 @@ class DDAD:
         self.config = config
         self.reconstruction = Reconstruction(self.unet, self.config)
         self.transform = transforms.Compose([
-                            transforms.CenterCrop((224)), 
+                            transforms.CenterCrop((256)), 
                         ])
 
     def __call__(self) -> Any:
@@ -43,15 +43,30 @@ class DDAD:
         reconstructed_list = []
         forward_list = []
 
-
-
+        i = 0
+        os.makedirs("features",exist_ok=True)
         with torch.no_grad():
-            for input, gt, labels in self.testloader:
+            for input, labels in self.testloader:
                 input = input.to(self.config.model.device)
                 x0 = self.reconstruction(input, input, self.config.model.w)[-1]
                 anomaly_map = heat_map(x0, input, feature_extractor, self.config)
 
                 anomaly_map = self.transform(anomaly_map)
+
+                image = show_tensor_image(anomaly_map)
+                for b in range(x0.shape[0]):
+                    x = show_tensor_image(x0[b])
+                    y = show_tensor_image(anomaly_map[b])
+                    print(i,np.sum(y)/(256*256))
+                    plt.imshow(y, cmap='hot', interpolation='nearest', vmin=100, vmax=255)
+                    plt.colorbar()
+                    plt.savefig(f"heat.jpg")
+                    plt.close()
+                    y = np.array(Image.open("heat.jpg").resize((256,256)))
+                    image = np.hstack((x,y))
+                    Image.fromarray(image).save(f"features/{i}.png")
+                    i+=1
+                continue
                 gt = self.transform(gt)
 
                 forward_list.append(input)
@@ -64,7 +79,7 @@ class DDAD:
                     labels_list.append(0 if label == 'good' else 1)
                     predictions.append(torch.max(pred).item())
 
-        
+        return  
         metric = Metric(labels_list, predictions, anomaly_map_list, gt_list, self.config)
         metric.optimal_threshold()
         if self.config.metrics.auroc:

@@ -8,6 +8,7 @@ from anomaly_map import *
 from metrics import *
 from feature_extractor import *
 from reconstruction import *
+import matplotlib.pyplot as plt
 os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2"
 from skimage.metrics import structural_similarity as ssim
 
@@ -79,7 +80,7 @@ class Inference:
             root= config.data.data_dir,
             category=config.data.category,
             config = config,
-            is_train=True,
+            is_train=False,
         )
         self.testloader = torch.utils.data.DataLoader(
             self.test_dataset,
@@ -106,9 +107,17 @@ class Inference:
                     image = np.hstack((x,y))
                     score,diff = compute_ssim(x,y)
                     image = np.hstack((image,diff))
-                    Image.fromarray(image).save(f"recons/{i}.png")
                     print(i,np.round(score,2))
-                    i+=1
                     scores.append(score)
+                    # Create plot in image
+                    plt.plot(scores)
+                    plt.ylim(0,1)
+                    plt.savefig("plot.jpg")
+                    plt.close()
+                    plt.clf()
+                    plot = np.array(Image.open("plot.jpg").resize((x.shape[0],x.shape[1])))
+                    image = np.hstack((image,plot))
+                    Image.fromarray(image).save(f"recons/{i}.png")
+                    i+=1
         for i in np.argsort(scores):
             print(i,scores[i])

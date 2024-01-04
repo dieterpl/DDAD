@@ -17,15 +17,15 @@ model:
   checkpoint_dir: checkpoints/MVTec   #MTD  #MVTec  #VisA
   checkpoint_name: weights
   exp_name: default
-  feature_extractor: wide_resnet101_2 #wide_resnet101_2  # wide_resnet50_2 #resnet50
+  feature_extractor: resnet50 #wide_resnet101_2  # wide_resnet50_2 #resnet50
   learning_rate: 3e-4 
   weight_decay: 0.05
   epochs: 3000
   load_chp : 2000 # From this epoch checkpoint will be loaded. Every 250 epochs a checkpoint is saved. Try to load 750 or 1000 epochs for Visa and 1000-1500-2000 for MVTec.
   DA_epochs: 4 # Number of epochs for Domain adaptation.
-  DA_chp: 4
-  v : 1 #7 # 1 for MVTec and cashew in VisA, and 7 for VisA (1.5 for cashew). Control parameter for pixel-wise and feature-wise comparison. v * D_p + D_f
-  w : 0.1 # Conditionig parameter. The higher the value, the more the model is conditioned on the target image. "Fine tuninig this parameter results in better performance".
+  DA_chp: 1
+  v : 0 #7 # 1 for MVTec and cashew in VisA, and 7 for VisA (1.5 for cashew). Control parameter for pixel-wise and feature-wise comparison. v * D_p + D_f
+  w : 0.25 # Conditionig parameter. The higher the value, the more the model is conditioned on the target image. "Fine tuninig this parameter results in better performance".
   w_DA : 3 #3 # Conditionig parameter for domain adaptation. The higher the value, the more the model is conditioned on the target image.
   DLlambda : 0.1 # 0.1 for MVTec and 0.01 for VisA
   trajectory_steps: 1000
@@ -34,7 +34,7 @@ model:
   skip : 25   # Number of steps to skip for denoising trajectory.
   skip_DA : 25
   eta : 1 # Stochasticity parameter for denoising process.
-  beta_start : 0.001
+  beta_start : 0.0001
   beta_end : 0.02 
   device: 'cuda' #<"cpu", "gpu", "tpu", "ipu">
   save_model: True

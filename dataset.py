@@ -45,6 +45,7 @@ class Dataset_maker(torch.utils.data.Dataset):
             else:
                 self.image_files = glob(os.path.join(root, "test", "*.jpg"))
         print("Images",len(self.image_files))
+        self.image_files.sort()
         self.is_train = is_train
 
     def __getitem__(self, index):

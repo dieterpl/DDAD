@@ -77,6 +77,7 @@ def domain_adaptation(unet, config, fine_tune):
         reconstruction = Reconstruction(unet, config)
         for epoch in range(config.model.DA_epochs):
             for step, batch in enumerate(trainloader):
+
                 half_batch_size = batch[0].shape[0]//2
                 target = batch[0][:half_batch_size].to(config.model.device)  
                 input = batch[0][half_batch_size:].to(config.model.device)   
@@ -97,11 +98,11 @@ def domain_adaptation(unet, config, fine_tune):
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-
+                print(f"Step {step}, loss:{loss}")
             print(f"Epoch {epoch+1} | Loss: {loss.item()}")
             # if (epoch+1) % 5 == 0:
             torch.save(feature_extractor.state_dict(), os.path.join(os.path.join(os.getcwd(), config.model.checkpoint_dir), f'feat{epoch+1}'))
     else:
-        checkpoint = torch.load(os.path.join(os.path.join(os.getcwd(), config.model.checkpoint_dir), 'feat{config.model.DA_chp}'))#{config.model.DA_chp}            
+        checkpoint = torch.load(os.path.join(os.path.join(os.getcwd(), config.model.checkpoint_dir), f'feat{config.model.DA_chp}'))#{config.model.DA_chp}            
         feature_extractor.load_state_dict(checkpoint)  
     return feature_extractor
